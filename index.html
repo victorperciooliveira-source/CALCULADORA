@@ -1,120 +1,183 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora</title>
     <style>
-        *{
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box; /* Garante que os tamanhos fiquem perfeitos */
         }
-        .fundo{
-            background-image: linear-gradient(45deg,rgb(255, 255, 255), rgb(0, 238, 255));
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f, #0f0f1a);
             height: 100vh;
             color: #fff;
-            font-family: Arial, Helvetica, sans-serif;
-            text-align: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
         }
-        .calculadora{
-            position: absolute;
-            background-color: rgba(68, 121, 201, 0.8);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%,-50%);
-            border-radius: 15px;
-            padding: 15px;
+
+        h1.nome-usuario {
+            font-size: 20px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
         }
-        .botao{
-            width: 50px;
-            height: 50px;
-            font-size: 25px;
+
+        .calculadora {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px); /* Efeito de vidro fosco */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            width: 290px;
+        }
+
+        .titulo-calc {
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: left;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        #resultado {
+            background-color: rgba(0, 0, 0, 0.3);
+            width: 100%;
+            height: 60px;
+            margin-bottom: 20px;
+            font-size: 32px;
+            color: #00ffcc; /* Cor neon para o resultado */
+            text-align: right;
+            padding: 10px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: monospace;
+            /* Permite ver números grandes sem quebrar o layout */
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        /* Esconde a barra de rolagem do visor para ficar elegante */
+        #resultado::-webkit-scrollbar {
+            height: 0px;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 8px;
+            width: 100%;
+        }
+
+        .botao {
+            width: 52px;
+            height: 52px;
+            font-size: 22px;
             cursor: pointer;
-            margin: 3px;
-            background-color: rgb(31,31,31);
+            background-color: rgba(255, 255, 255, 0.1);
             border: none;
             color: #fff;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            font-weight: 500;
         }
-        .botao:hover{
-            background-color: black;
+
+        /* Efeito ao passar o mouse */
+        .botao:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
-        #resultado{
-            background-color: white;
-            width: 207px;
-            height: 30px;
-            margin: 5px;
-            font-size: 25px;
-            color: black;
-            text-align: right;
-            padding: 5px;
+
+        /* Efeito ao clicar */
+        .botao:active {
+            transform: translateY(1px);
+        }
+
+        /* Botões especiais (C, Apagar, Operadores) */
+        .botao-op {
+            background-color: rgba(255, 159, 10, 0.15);
+            color: #ff9f0a;
+        }
+        .botao-op:hover {
+            background-color: #ff9f0a;
+            color: #fff;
+        }
+
+        .botao-clean {
+            background-color: rgba(255, 69, 58, 0.15);
+            color: #ff453a;
+        }
+        .botao-clean:hover {
+            background-color: #ff453a;
+            color: #fff;
+        }
+
+        /* Botão de igual */
+        .botao-igual {
+            background: linear-gradient(135deg, #00eceb, #0099ff);
+            color: #fff;
+            font-weight: bold;
+        }
+        .botao-igual:hover {
+            background: linear-gradient(135deg, #00ffff, #00bfff);
+            box-shadow: 0 0 15px rgba(0, 238, 255, 0.4);
         }
     </style>
 </head>
 <body>
-    <div class="fundo">
-        <h1>victor Percio</h1>
-        <div class="calculadora">
-            <h1>Calculadora</h1>
-            <p id="resultado"></p>
-            <table>
-                <tr>
-                    <td><button class="botao" onclick="clean()">C</button></td>
-                    <td><button class="botao" onclick="back()"><</button></td>
-                    <td><button class="botao" onclick="insert('/')">/</button></td>
-                    <td><button class="botao" onclick="insert('*')">X</button></td>
-                </tr>
-                <tr>
-                    <td><button class="botao" onclick="insert('7')">7</button></td>
-                    <td><button class="botao" onclick="insert('8')">8</button></td>
-                    <td><button class="botao" onclick="insert('9')">9</button></td>
-                    <td><button class="botao" onclick="insert('-')">-</button></td>
-                </tr>
-                <tr>
-                    <td><button class="botao" onclick="insert('4')">4</button></td>
-                    <td><button class="botao" onclick="insert('5')">5</button></td>
-                    <td><button class="botao" onclick="insert('6')">6</button></td>
-                    <td><button class="botao" onclick="insert('+')">+</button></td>
-                </tr>
-                <tr>
-                    <td><button class="botao" onclick="insert('1')">1</button></td>
-                    <td><button class="botao" onclick="insert('2')">2</button></td>
-                    <td><button class="botao" onclick="insert('3')">3</button></td>
-                    <td rowspan="2"><button class="botao" style="height: 106px;" onclick="calcular()">=</button></td>
-                </tr>
-                <tr>
-                    <td colspan="2"><button class="botao" style="width: 106px;" onclick="insert('0')">0</button></td>
-                    <td><button class="botao" onclick="insert('.')">.</button></td>
-                </tr>
-            </table>
-        </div>
+
+    <h1 class="nome-usuario">Victor Percio</h1>
+
+    <div class="calculadora">
+        <div class="titulo-calc">Calculadora</div>
+        <p id="resultado"></p>
+        
+        <table>
+            <tr>
+                <td><button class="botao botao-clean" onclick="clean()">C</button></td>
+                <td><button class="botao botao-op" onclick="back()">&lt;</button></td>
+                <td><button class="botao botao-op" onclick="insert('/')">/</button></td>
+                <td><button class="botao botao-op" onclick="insert('*')">×</button></td>
+            </tr>
+            <tr>
+                <td><button class="botao" onclick="insert('7')">7</button></td>
+                <td><button class="botao" onclick="insert('8')">8</button></td>
+                <td><button class="botao" onclick="insert('9')">9</button></td>
+                <td><button class="botao botao-op" onclick="insert('-')">-</button></td>
+            </tr>
+            <tr>
+                <td><button class="botao" onclick="insert('4')">4</button></td>
+                <td><button class="botao" onclick="insert('5')">5</button></td>
+                <td><button class="botao" onclick="insert('6')">6</button></td>
+                <td><button class="botao botao-op" onclick="insert('+')">+</button></td>
+            </tr>
+            <tr>
+                <td><button class="botao" onclick="insert('1')">1</button></td>
+                <td><button class="botao" onclick="insert('2')">2</button></td>
+                <td><button class="botao" onclick="insert('3')">3</button></td>
+                <td rowspan="2"><button class="botao botao-igual" style="height: 112px;" onclick="calcular()">=</button></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button class="botao" style="width: 112px;" onclick="insert('0')">0</button></td>
+                <td><button class="botao" onclick="insert('.')">.</button></td>
+            </tr>
+        </table>
     </div>
+
     <script>
         function insert(num)
         {
             var numero = document.getElementById('resultado').innerHTML;
-            document.getElementById('resultado').innerHTML = numero + num;
-        }
-        function clean()
-        {
-            document.getElementById('resultado').innerHTML = "";
-        }
-        function back()
-        {
-            var resultado = document.getElementById('resultado').innerHTML;
-            document.getElementById('resultado').innerHTML = resultado.substring(0, resultado.length -1);
-        }
-        function calcular()
-        {
-            var resultado = document.getElementById('resultado').innerHTML;
-            if(resultado)
-            {
-                document.getElementById('resultado').innerHTML = eval(resultado);
-            }
-            else
-            {
-                document.getElementById('resultado').innerHTML = "Nada..."
-            }
-        }
-    </script>
-</body>
-</html>
+            
+            if(numero === "Nada..." || numero === "Erro") {
+                document.getElementById('resultado').innerHTML = num;
+            } else {
+                document.getElementById('
