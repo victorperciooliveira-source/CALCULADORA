@@ -8,7 +8,7 @@
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box; /* Garante que os tamanhos fiquem perfeitos */
+            box-sizing: border-box;
         }
 
         body {
@@ -33,12 +33,12 @@
 
         .calculadora {
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px); /* Efeito de vidro fosco */
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             padding: 24px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            width: 290px;
+            width: 320px; /* Aumentado ligeiramente para dar mais espaço */
         }
 
         .titulo-calc {
@@ -52,23 +52,28 @@
         #resultado {
             background-color: rgba(0, 0, 0, 0.3);
             width: 100%;
-            height: 60px;
+            height: 70px; /* Mais alto para números grandes */
             margin-bottom: 20px;
-            font-size: 32px;
-            color: #00ffcc; /* Cor neon para o resultado */
+            font-size: 26px; /* Tamanho ajustado para não quebrar */
+            color: #00ffcc;
             text-align: right;
-            padding: 10px 15px;
+            padding: 15px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             font-family: monospace;
-            /* Permite ver números grandes sem quebrar o layout */
+            /* ESSENCIAL: Permite rolar para o lado se o número for gigante */
             overflow-x: auto;
             white-space: nowrap;
+            word-wrap: normal;
         }
 
-        /* Esconde a barra de rolagem do visor para ficar elegante */
+        /* Linha de código para sumir com a barra de rolagem horizontal feia */
         #resultado::-webkit-scrollbar {
-            height: 0px;
+            height: 4px;
+        }
+        #resultado::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 204, 0.2);
+            border-radius: 10px;
         }
 
         table {
@@ -78,8 +83,8 @@
         }
 
         .botao {
-            width: 52px;
-            height: 52px;
+            width: 58px;
+            height: 58px;
             font-size: 22px;
             cursor: pointer;
             background-color: rgba(255, 255, 255, 0.1);
@@ -90,18 +95,15 @@
             font-weight: 500;
         }
 
-        /* Efeito ao passar o mouse */
         .botao:hover {
             background-color: rgba(255, 255, 255, 0.2);
             transform: translateY(-2px);
         }
 
-        /* Efeito ao clicar */
         .botao:active {
             transform: translateY(1px);
         }
 
-        /* Botões especiais (C, Apagar, Operadores) */
         .botao-op {
             background-color: rgba(255, 159, 10, 0.15);
             color: #ff9f0a;
@@ -120,7 +122,6 @@
             color: #fff;
         }
 
-        /* Botão de igual */
         .botao-igual {
             background: linear-gradient(135deg, #00eceb, #0099ff);
             color: #fff;
@@ -163,21 +164,82 @@
                 <td><button class="botao" onclick="insert('1')">1</button></td>
                 <td><button class="botao" onclick="insert('2')">2</button></td>
                 <td><button class="botao" onclick="insert('3')">3</button></td>
-                <td rowspan="2"><button class="botao botao-igual" style="height: 112px;" onclick="calcular()">=</button></td>
+                <td rowspan="2"><button class="botao botao-igual" style="height: 124px;" onclick="calcular()">=</button></td>
             </tr>
             <tr>
-                <td colspan="2"><button class="botao" style="width: 112px;" onclick="insert('0')">0</button></td>
+                <td colspan="2"><button class="botao" style="width: 124px;" onclick="insert('0')">0</button></td>
                 <td><button class="botao" onclick="insert('.')">.</button></td>
             </tr>
         </table>
     </div>
 
     <script>
+        // Variável de controle para saber se o resultado acabou de ser exibido
+        let mostrandoResultado = false;
+
         function insert(num)
         {
-            var numero = document.getElementById('resultado').innerHTML;
+            var visor = document.getElementById('resultado');
             
-            if(numero === "Nada..." || numero === "Erro") {
-                document.getElementById('resultado').innerHTML = num;
+            // Se der erro ou o usuário digitar um número logo após um resultado, ele limpa a tela para começar nova conta
+            if(visor.innerHTML === "Nada..." || visor.innerHTML === "Erro" || (mostrandoResultado && !isNaN(num))) {
+                visor.innerHTML = num;
             } else {
-                document.getElementById('
+                visor.innerHTML = visor.innerHTML + num;
+            }
+            mostrandoResultado = false;
+            
+            // Auto-rolagem para acompanhar números compridos enquanto digita
+            visor.scrollLeft = visor.scrollWidth;
+        }
+        
+        function clean()
+        {
+            document.getElementById('resultado').innerHTML = "";
+            mostrandoResultado = false;
+        }
+        
+        function back()
+        {
+            var visor = document.getElementById('resultado');
+            if(visor.innerHTML === "Nada..." || visor.innerHTML === "Erro") {
+                clean();
+            } else {
+                visor.innerHTML = visor.innerHTML.substring(0, visor.innerHTML.length - 1);
+            }
+        }
+        
+        function calcular()
+        {
+            var visor = document.getElementById('resultado');
+            var expressao = visor.innerHTML;
+            
+            if(expressao && expressao !== "Nada..." && expressao !== "Erro")
+            {
+                try {
+                    // Executa o cálculo básico
+                    let conta = Function('"use strict";return (' + expressao + ')')();
+                    
+                    if (conta !== undefined && !isNaN(conta)) {
+                        // Resolve o problema de aproximação do JS (ex: 0.1 + 0.2 não dar 0.3000000000004)
+                        if (conta % 1 !== 0) {
+                            // Se for decimal muito pequeno ou grande, limita a precisão para caber limpo
+                            conta = parseFloat(conta.toPrecision(12));
+                        }
+                        visor.innerHTML = conta;
+                        mostrandoResultado = true;
+                    } else {
+                        visor.innerHTML = "Erro";
+                    }
+                } catch(e) {
+                    visor.innerHTML = "Erro";
+                }
+            }
+            else
+            {
+                visor.innerHTML = "Nada...";
+            }
+        }
+    </script>
+</body>
+</html>
